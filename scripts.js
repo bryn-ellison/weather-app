@@ -13,7 +13,6 @@ async function getJSON(city, unit) {
     errorMsg.textContent = "City not found, please try again";
     errorMsg.id = "error";
     form.appendChild(errorMsg);
-    body.appendChild(form);
   } else {
     const responseData = await response.json();
 
@@ -23,16 +22,31 @@ async function getJSON(city, unit) {
 
 // prosess weather data
 
-async function processWeatherData(response) {
+async function processWeatherData(response, unit) {
   const responseData = await response;
+  console.log(responseData);
+  function capitalize() {
+    const word = responseData.weather[0].description;
+    const capitalized = word.charAt(0).toUpperCase() + word.slice(1);
+    return capitalized;
+  }
+  let tempUnit = "";
+  let windUnit = "";
+  if (unit === "metric") {
+    tempUnit = "°C";
+    windUnit = "km/ph";
+  } else if (unit === "imperial") {
+    tempUnit = "°F";
+    windUnit = "mph";
+  }
   const weather = {
     place: responseData.name,
     currentTemp: responseData.main.temp,
-    feelsLike: Math.trunc(responseData.main.feels_like),
-    tempMax: Math.trunc(responseData.main.temp_max),
-    tempMin: Math.trunc(responseData.main.temp_min),
-    weatherDesc: responseData.weather[0].main,
-    wind: responseData.wind.speed,
+    feelsLike: Math.trunc(responseData.main.feels_like) + tempUnit,
+    tempMax: Math.trunc(responseData.main.temp_max) + tempUnit,
+    tempMin: Math.trunc(responseData.main.temp_min) + tempUnit,
+    weatherDesc: capitalize(),
+    wind: Math.trunc(responseData.wind.speed) + windUnit,
   };
   return weather;
 }
@@ -42,6 +56,7 @@ async function processWeatherData(response) {
 function displayForm() {
   const form = document.getElementById("form-container");
   const search = document.createElement("input");
+  search.placeholder = "Input a UK city or town";
   const metric = document.createElement("input");
   metric.type = "radio";
   metric.value = "metric";
@@ -60,7 +75,7 @@ function displayForm() {
   labelImp.textContent = "Imperial units";
   labelImp.for = "imperial";
   const submit = document.createElement("button");
-  submit.textContent = "Show me the weather here";
+  submit.textContent = "Search";
   submit.addEventListener("click", () => {
     const selectedUnit = document.querySelector(
       "input[name='units']:checked"
@@ -95,23 +110,50 @@ async function displayWeather(search, unit) {
   container.appendChild(loadingMsg);
 
   try {
-    const data = await processWeatherData(getJSON(search, unit));
+    const data = await processWeatherData(getJSON(search, unit), unit);
     container.removeChild(loadingMsg);
     const place = document.getElementById("place");
     place.textContent = data.place;
     const weathDesc = document.getElementById("desc");
     weathDesc.textContent = `${data.weatherDesc}`;
     const feelsLike = document.getElementById("feels-like");
-    feelsLike.textContent = `Feels like now: ${data.feelsLike}°`;
+    feelsLike.textContent = `Feels like now: ${data.feelsLike}`;
     const minTemp = document.getElementById("min");
-    minTemp.textContent = `Min temp today: ${data.tempMin}°`;
+    minTemp.textContent = `Min temp today: ${data.tempMin}`;
     const maxTemp = document.getElementById("max");
-    maxTemp.textContent = `Max temp today: ${data.tempMax}°`;
+    maxTemp.textContent = `Max temp today: ${data.tempMax}`;
     const windSpd = document.getElementById("wind");
     windSpd.textContent = `Wind speed: ${data.wind}`;
+    displayGif(data.weatherDesc);
   } catch (error) {
     container.removeChild(loadingMsg);
   }
+}
+
+// display gif on page
+
+async function displayGif(search) {
+  try {
+    const gifUrl = await getGif(search);
+    const gif = document.querySelector("img");
+    gif.src = gifUrl;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// fetch giphy gif
+
+async function getGif(search) {
+  let term = "cats";
+  if (search) term = search;
+  const response = await fetch(
+    `https://api.giphy.com/v1/gifs/translate?api_key=QAU4qa50goNAnD9LsVSGxagX50nrmQSJ&s=weather ${term}`
+  );
+  const termData = await response.json();
+  console.log(termData);
+  const imgUrl = termData.data.images.downsized.url;
+  return imgUrl;
 }
 
 // init functions and append page content
