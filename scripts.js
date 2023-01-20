@@ -8,14 +8,12 @@ async function getJSON(city, unit) {
     await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},uk&appid=03f228f472f14860b0098890962da616&units=${unit}
     `);
   if (response.status !== 200) {
-    const errorMsg = document.createElement("p");
-    const form = document.getElementById("form-container");
-    errorMsg.textContent = "City not found, please try again";
-    errorMsg.id = "error";
-    form.appendChild(errorMsg);
+    const container = document.getElementById("container");
+    const input = document.getElementById("search");
+    input.value = "";
+    input.placeholder = "Location not found, please try again";
   } else {
     const responseData = await response.json();
-
     return responseData;
   }
 }
@@ -24,7 +22,6 @@ async function getJSON(city, unit) {
 
 async function processWeatherData(response, unit) {
   const responseData = await response;
-  console.log(responseData);
   function capitalize() {
     const word = responseData.weather[0].description;
     const capitalized = word.charAt(0).toUpperCase() + word.slice(1);
@@ -56,6 +53,7 @@ async function processWeatherData(response, unit) {
 function displayForm() {
   const form = document.getElementById("form-container");
   const search = document.createElement("input");
+  search.id = "search";
   search.placeholder = "Input a UK city or town";
   const metric = document.createElement("input");
   metric.type = "radio";
@@ -82,7 +80,6 @@ function displayForm() {
     ).value;
     searchButton(search.value, selectedUnit);
   });
-
   form.appendChild(search);
   form.appendChild(submit);
   form.appendChild(metric);
@@ -100,15 +97,13 @@ function searchButton(search, unit) {
 // display weather object data on page
 
 async function displayWeather(search, unit) {
-  const container = document.getElementById("weather-container");
-  const formContainer = document.getElementById("form-container");
+  const container = document.getElementById("container");
   const errorMsg = document.getElementById("error");
-  if (errorMsg) formContainer.removeChild(errorMsg);
+  if (errorMsg) container.removeChild(errorMsg);
   const loadingMsg = document.createElement("p");
   loadingMsg.textContent = "loading weather data...";
   loadingMsg.id = "loading";
   container.appendChild(loadingMsg);
-
   try {
     const data = await processWeatherData(getJSON(search, unit), unit);
     container.removeChild(loadingMsg);
@@ -148,10 +143,9 @@ async function getGif(search) {
   let term = "cats";
   if (search) term = search;
   const response = await fetch(
-    `https://api.giphy.com/v1/gifs/translate?api_key=QAU4qa50goNAnD9LsVSGxagX50nrmQSJ&s=weather ${term}`
+    `https://api.giphy.com/v1/gifs/translate?api_key=QAU4qa50goNAnD9LsVSGxagX50nrmQSJ&s=weather+${term}`
   );
   const termData = await response.json();
-  console.log(termData);
   const imgUrl = termData.data.images.downsized.url;
   return imgUrl;
 }
