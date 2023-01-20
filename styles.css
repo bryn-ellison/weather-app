@@ -1,0 +1,12 @@
+#container {
+    border: 2px solid black;
+    width: 600px;
+}
+
+#form-container {
+    background-color: aquamarine;
+}
+
+#weather-container {
+    background-color: gainsboro;
+}
