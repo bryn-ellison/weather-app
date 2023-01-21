@@ -43,7 +43,6 @@ p {
 
 #form-container {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-items: center;
     background-color: #dfac94;
@@ -58,12 +57,14 @@ input {
 
 label{
     vertical-align: 5px;
+    font-size: 0.8rem;
   }
 
 
 #search {
-    width: 220px;
+    width: 240px;
     padding: 5px;
+    font-family: 'Rubik', sans-serif;
 }
 
 #search:focus {
@@ -76,6 +77,8 @@ button {
     border: none;
     height: 60%;
     padding: 10px;
+    background-color: #36484d;
+    color: #dfac94;
 }
 
 #weather-container {
